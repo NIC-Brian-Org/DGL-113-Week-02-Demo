@@ -1,48 +1,87 @@
-import exp from 'constants';
-import path from 'path';
+import path from "path";
 
-describe('index.html', () => {
-  const dialogHandler2 = jest.fn(dialog => dialog.dismiss());
-
+describe("index.html", () => {
   beforeAll(async () => {
-    const URL = `file:///${path.resolve(__dirname, '../docs/index.html')}`;
-    page.on('dialog', dialogHandler2);
-    await page.goto(URL, {
-      waitUntil: 'networkidle2'
-    });
+    const URL = `file:///${path.resolve(__dirname, "../docs/index.html")}`;
+    await page.setViewport({'width': 1920, 'height': 1080 });
+    await page.goto(URL);
   });
 
-  it('proPrice == 99', async () => {
-    const proPrice = await page.evaluate('proPrice');
-    expect(proPrice).toEqual(99);
+  it("Free plan", async () => {
+    await page.click('#freebutton');
+
+    await page.waitForSelector('#planname');
+    let element = await page.$('#planname');
+    let value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("Free");
+
+    await page.waitForSelector('#monthlyrate');
+    element = await page.$('#monthlyrate');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("$0/mo");
+
+    await page.waitForSelector('#annualrate');
+    element = await page.$('#annualrate');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("$0/yr");
+
+    let nextYear = new Date();
+    nextYear.setFullYear( nextYear.getFullYear() + 1 );
+    await page.waitForSelector('#gooduntil');
+    element = await page.$('#gooduntil');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual(nextYear.toDateString());
   });
 
-  it('proPrice card 99', async () => {
-    await page.waitForSelector('#propriceh1');
-    const element = await page.$('#propriceh1');
-    const value = await page.evaluate(el => el.textContent, element);
-    expect(value).toMatch(/^\$.*[^0-9\.]99\/mo$/);
+  it("Pro plan", async () => {
+    await page.click('#probutton');
+
+    await page.waitForSelector('#planname');
+    let element = await page.$('#planname');
+    let value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("Pro");
+
+    await page.waitForSelector('#monthlyrate');
+    element = await page.$('#monthlyrate');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("$15/mo");
+
+    await page.waitForSelector('#annualrate');
+    element = await page.$('#annualrate');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("$180/yr");
+
+    let nextYear = new Date();
+    nextYear.setFullYear( nextYear.getFullYear() + 1 );
+    await page.waitForSelector('#gooduntil');
+    element = await page.$('#gooduntil');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual(nextYear.toDateString());
   });
 
-  it('enterprisePrice == 198', async () => {
-    const enterprisePrice = await page.evaluate('enterprisePrice');
-    expect(enterprisePrice).toEqual(198);
-  });
+  it("Enterprise plan", async () => {
+    await page.click('#enterprisebutton');
 
-  it('enterprisePrice card 198', async () => {
-    await page.waitForSelector('#enterprisepriceh1');
-    const element = await page.$('#enterprisepriceh1');
-    const value = await page.evaluate(el => el.textContent, element);
-    expect(value).toMatch(/^\$.*[^0-9\.]198\/mo$/);
-  });
+    await page.waitForSelector('#planname');
+    let element = await page.$('#planname');
+    let value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("Enterprise");
 
-  it('should display a dialog', () => {
-    expect(dialogHandler2).toHaveBeenCalled();
-  });
+    await page.waitForSelector('#monthlyrate');
+    element = await page.$('#monthlyrate');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("$29/mo");
 
-  it('should have message "Check out our amazing prices!"', () => {
-    const [firstCall] = dialogHandler2.mock.calls;
-    const [dialog] = firstCall;
-    expect(dialog.message()).toEqual('Check out our amazing prices!');
+    await page.waitForSelector('#annualrate');
+    element = await page.$('#annualrate');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual("$348/yr");
+
+    let nextYear = new Date();
+    nextYear.setFullYear( nextYear.getFullYear() + 1 );
+    await page.waitForSelector('#gooduntil');
+    element = await page.$('#gooduntil');
+    value = await page.evaluate(el => el.innerText, element);
+    expect(value).toEqual(nextYear.toDateString());
   });
 });
